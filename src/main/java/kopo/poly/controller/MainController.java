@@ -12,4 +12,11 @@ public class MainController {
         log.info(this.getClass().getName() + ".index Start!");
         return "/main";
     }
+
+    @GetMapping("/test")
+    public String test() throws Exception{
+        log.info(this.getClass().getName() + ".test Start!");
+        return "/test";
+    }
+
 }
