@@ -3,9 +3,12 @@ package kopo.poly.service.impl;
 import kopo.poly.service.IUserInfoService;
 import kopo.poly.persistance.mapper.IUserInfoMapper;
 import kopo.poly.dto.UserInfoDTO;
+import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +31,26 @@ public class UserInfoService implements IUserInfoService {
 
     @Override
     public UserInfoDTO getLogin(UserInfoDTO pDTO) throws Exception {
+
+        log.info(this.getClass().getName() + ".getLogin Start!");
+
+        UserInfoDTO rDTO = Optional.ofNullable(userInfoMapper.getLogin(pDTO)).orElseGet(UserInfoDTO::new);
+
+        if(CmmUtil.nvl(rDTO.getUser_id()).length() > 0) {
+            log.info("로그인 성공");
+        }
+
+        log.info(this.getClass().getName() + ".getLogin End!");
+        return rDTO;
+    }
+
+    @Override
+    public UserInfoDTO getUserIdExists(UserInfoDTO pDTO) throws Exception {
+        return null;
+    }
+
+    @Override
+    public UserInfoDTO getEmailExists(UserInfoDTO pDTO) throws Exception {
         return null;
     }
 }

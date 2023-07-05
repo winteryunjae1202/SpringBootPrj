@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 
 @Slf4j
@@ -65,25 +66,81 @@ public class UserInfoController {
             // 회원가입
             res = userInfoService.insertUserInfo(pDTO);
             log.info("회원가입 결과(res) : " + res);
-            if(res == 1) {
+            if (res == 1) {
                 msg = "회원가입되었습니다.";
-            } else if(res == 2){
+                url = "/user/login";
+            } else if (res == 2) {
                 msg = "이미 가입된 아이디입니다.";
+                url = "/user/userRegForm";
             } else {
                 msg = "오류로 인해 회원가입이 실패하였습니다.";
             }
-        }   catch (Exception e) {
+        } catch (Exception e) {
             msg = "실패하였습니다. : " + e;
             log.info(e.toString());
             e.printStackTrace();
 
-        }   finally {
-                modelMap.addAttribute("msg", msg);
-                modelMap.addAttribute("url", url);
+        } finally {
+            modelMap.addAttribute("msg", msg);
+            modelMap.addAttribute("url", url);
 
-                log.info(this.getClass().getName() + ".insertUserInfo End!");
+            log.info(this.getClass().getName() + ".insertUserInfo End!");
         }
 
         return "/redirect";
+    }
+
+
+    @PostMapping(value = "/user/loginProc")
+    public String loginProc(HttpServletRequest request, ModelMap model, HttpSession session) {
+        log.info(this.getClass().getName() + ".loginProc Start!");
+
+        String msg = "";
+        String url = "";
+        UserInfoDTO pDTO = null;
+
+        try {
+            String user_id = CmmUtil.nvl(request.getParameter("user_id"));
+            String password = CmmUtil.nvl(request.getParameter("password"));
+            log.info("user_id : " + user_id);
+            log.info("password : " + password);
+
+            pDTO = new UserInfoDTO();
+            pDTO.setUser_id(user_id);
+
+            pDTO.setPassword(EncryptUtil.encHashSHA256(password));
+
+            UserInfoDTO rDTO = userInfoService.getLogin(pDTO);
+
+            if (CmmUtil.nvl(rDTO.getUser_id()).length() > 0) {
+                session.setAttribute("SS_USER_ID", user_id);
+                session.setAttribute("SS_USER_NAME", CmmUtil.nvl(rDTO.getUser_name()));
+
+                msg = "로그인이 성공했습니다. \n" + rDTO.getUser_name() + "님 환영합니다.";
+                url = "/notice/noticeList";
+            } else {
+                msg = "로그인이 실패했습니다. 재입력 해주세요.";
+                url = "/user/login";
+            }
+        } catch (Exception e) {
+            msg = "시스템 문제로 로그인이 실패했습니다.";
+            log.info(e.toString());
+            e.printStackTrace();
+        } finally {
+            model.addAttribute("msg", msg);
+            model.addAttribute("url", url);
+
+            log.info(this.getClass().getName() + ".loginProc End!");
+        }
+
+        return "/redirect";
+    }
+
+    @GetMapping(value = "/user/login")
+    public String login() {
+        log.info(this.getClass().getName() + ".user.login Start!");
+        log.info(this.getClass().getName() + ".user.login End!");
+
+        return "/user/login";
     }
 }
