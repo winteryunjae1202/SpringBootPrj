@@ -16,4 +16,8 @@ public class UserInfoDTO {
     private String reg_dt;
     private String chg_id;
     private String chg_dt;
+
+    private String exists_yn;   // 중복체크를 위한 변수
+
+    private int authNumber;     // 이메일 중복체크를 위한 인증번호
 }
